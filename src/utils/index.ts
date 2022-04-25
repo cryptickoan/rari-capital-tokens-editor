@@ -8,7 +8,8 @@ export const uploadToRepo = async (
     content: string,
     tokenAddress: string,
     commitMessage: string,
-    branchTitle: string
+    branchTitle: string,
+    chainID: string
   ) => {
     // 1. Get latest commit from the base branch.
     const currentCommit = await getCurrentCommit(octo, owner, repo, branch)
@@ -20,7 +21,7 @@ export const uploadToRepo = async (
     const filesBlobs = await createBlobForFile(octo, owner, repo, content)
     
     // 4. Path in repo where the newly created blobs will be placed.
-    const pathsForBlobs = `src/${tokenAddress}/info.json`
+    const pathsForBlobs = `tokens/${chainID}/${tokenAddress}/info.json`
 
     // 5. Create new tree.
     const newTree = await createNewTree(

@@ -40,7 +40,7 @@ const Home: NextPage = () => {
   const onSubmit = async () => {
     if (!tokenAddress || !tokenSymbol || !tokenName || !tokenDecimals || !chainID) return
     
-    const octo = new Octokit({auth: "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"})
+    const octo = new Octokit({auth: "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"})
     const fileContent = JSON.stringify({
       address: tokenAddress,
       symbol: tokenSymbol.value,
@@ -53,13 +53,14 @@ const Home: NextPage = () => {
     
     await uploadToRepo(
       octo,
-      'cryptickoan',
-      'test',
+      'rari-tokens-list',
+      'rari-token-list',
       'main',
       fileContent,
       tokenAddress,
       commitAndPRTitle,
-      tokenSymbol.value
+      tokenSymbol.value,
+      chainID.value
     )
   }
 
@@ -143,6 +144,12 @@ const Home: NextPage = () => {
             value={tokenData.decimals}
             setter={setTokenDecimals}
             stateVariable={tokenDecimals}
+          />
+           <ConfigRow 
+            title="Chain"
+            value={chainID.value}
+            setter={setChainID}
+            stateVariable={chainID}
           />
 
           <Button
