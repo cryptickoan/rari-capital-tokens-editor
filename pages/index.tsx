@@ -1,11 +1,9 @@
-import { Avatar, Box, Button, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Box, Button, Flex, HStack, Input, VStack } from '@chakra-ui/react'
 import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
 import { useState } from 'react'
-import styles from '../styles/Home.module.css'
 import { Octokit } from "@octokit/rest";
 import { uploadToRepo } from '../src/utils'
+import { Card, Text } from "rari-components";
 
 const Home: NextPage = () => {
   const [tokenAddress, setTokenAddress] = useState<null | string>(null)
@@ -22,9 +20,6 @@ const Home: NextPage = () => {
     }
   }
 
-  
-  
-  
   const onSubmit = async () => {
     if (!tokenAddress || !tokenSymbol || !tokenName || !tokenDecimals || !chainID) return
     
@@ -54,8 +49,9 @@ const Home: NextPage = () => {
       height="100vh" 
       justifyContent="center" 
       alignItems="center"
+      bgColor="black"
     >
-     <Box 
+     <Card 
         backgroundColor="grey" 
         flexDirection="column" 
         borderRadius="15px" 
@@ -63,7 +59,7 @@ const Home: NextPage = () => {
         padding="30px"
         width="30%"
       >
-        <Text textAlign="center">Rari Tokens</Text>
+        <Text fontSize="6vh" textAlign="center">Rari Capital Token Editor</Text>
        { 
         !tokenAddress ? null :
         <VStack justifyContent="center">
@@ -126,7 +122,7 @@ const Home: NextPage = () => {
         </Button>
         </>
         }
-     </Box>
+     </Card>
    </Flex>
   )
 }
