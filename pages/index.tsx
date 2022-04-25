@@ -1,18 +1,35 @@
 import { Avatar, Box, Button, Flex, HStack, Input, VStack } from '@chakra-ui/react'
 import type { NextPage } from 'next'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Octokit } from "@octokit/rest";
 import { uploadToRepo } from '../src/utils'
-import { Card, Text } from "rari-components";
+import { Card, Divider, Text } from "rari-components";
+import useDebounce from '../src/hooks/useDebounce';
+import {utils} from 'ethers'
+import { TokenData, useTokenData } from '../src/hooks/useTokenData';
+
+type StateType = {
+  filled: boolean,
+  value: string
+}
 
 const Home: NextPage = () => {
-  const [tokenAddress, setTokenAddress] = useState<null | string>(null)
-  const [tokenSymbol, setTokenSymbol] = useState<null | string>(null)
-  const [tokenName, setTokenName] = useState<null | string>(null)
-  const [tokenDecimals, setTokenDecimals] = useState<null | string>(null)
-  const [chainID, setChainID] = useState<null | string>(null)
+  const [tokenAddress, setTokenAddress] = useState<string>("")
+  const [tokenSymbol, setTokenSymbol] = useState<StateType>({filled: false, value: ""})
+  const [tokenName, setTokenName] = useState<StateType>({filled: false, value: ""})
+  const [tokenDecimals, setTokenDecimals] = useState<StateType>({filled: false, value: ""})
+  const [chainID, setChainID] = useState<StateType>({filled: false, value: ""})
 
   const [image, setImage] = useState<string | null>(null)
+
+  const debouncedTokenAddress = useDebounce(tokenAddress, 500)
+
+  const isAddressValid = useMemo(() => {
+    return utils.isAddress(debouncedTokenAddress)
+  }, [debouncedTokenAddress])
+
+  const tokenData = useTokenData(isAddressValid, debouncedTokenAddress, "1")
+  
 
   const onImageChange = (event: any) => {
     if (event.target.files && event.target.files[0]) {
@@ -23,15 +40,17 @@ const Home: NextPage = () => {
   const onSubmit = async () => {
     if (!tokenAddress || !tokenSymbol || !tokenName || !tokenDecimals || !chainID) return
     
-    const octo = new Octokit({auth: "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"})
+    const octo = new Octokit({auth: "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"})
     const fileContent = JSON.stringify({
-      tokenAddress,
-      tokenSymbol,
-      tokenName,
-      tokenDecimals,
-      chainID
+      address: tokenAddress,
+      symbol: tokenSymbol.value,
+      name: tokenName.value,
+      decimals: tokenDecimals.value,
+      chainId: chainID.value
     })
 
+    const commitAndPRTitle = `${tokenSymbol.filled ? "Editing" : "Adding"} Token ${tokenSymbol.value}`
+    
     await uploadToRepo(
       octo,
       'cryptickoan',
@@ -39,7 +58,8 @@ const Home: NextPage = () => {
       'main',
       fileContent,
       tokenAddress,
-      tokenSymbol
+      commitAndPRTitle,
+      tokenSymbol.value
     )
   }
 
@@ -52,79 +72,122 @@ const Home: NextPage = () => {
       bgColor="black"
     >
      <Card 
-        backgroundColor="grey" 
+        backgroundColor="black" 
+        borderStyle="solid"
+        borderColor="#272727"
+        borderWidth="1px"
         flexDirection="column" 
         borderRadius="15px" 
+        padding="0"
         display="flex" 
-        padding="30px"
-        width="30%"
+        width="50% 10%"
       >
-        <Text fontSize="6vh" textAlign="center">Rari Capital Token Editor</Text>
-       { 
-        !tokenAddress ? null :
-        <VStack justifyContent="center">
-          <Avatar 
-            bg='teal.500' 
-            borderRadius="70%"
-            width="200px"
-            height="200px"
-            alignSelf="center"
-            src={image != null 
-                ? image 
-                :'/static/chip.png'
-            }
-          />
-          <Input 
-              type="file"
-              accept="image/png, image/jpeg"
-              onChange={onImageChange} 
-          />
-        </VStack>
-        }
-        <HStack justifyContent={!tokenAddress ? "center": "space-between"} width="100%">
-          { !tokenAddress ? null : <Text>Token Address: </Text>}
-          <Input
-            onChange={(e) => {setTokenAddress(e.target.value)}}
-          />
-        </HStack>
-        { 
-          !tokenAddress ? null :
-          <>
-        <HStack justifyContent="space-between" width="100%">
-          { tokenAddress === "" ? null : <Text>ChainID: </Text>}
-          <Input
-            type="number"
-            onChange={(e) => {setChainID(e.target.value)}}
-          />
-        </HStack>
-        <HStack justifyContent="space-between" width="100%">
-          { tokenAddress === "" ? null : <Text>Token Names: </Text>}
-          <Input
-            onChange={(e) => {setTokenName(e.target.value)}}
-          />
-        </HStack>
-        <HStack justifyContent="space-between" width="100%">
-          { tokenAddress === "" ? null : <Text>Token Symbol: </Text>}
-          <Input
-            onChange={(e) => {setTokenSymbol(e.target.value)}}
-          />
-        </HStack>
-        <HStack justifyContent="space-between" width="100%">
-          { tokenAddress === "" ? null : <Text>Token Decimals: </Text>}
-          <Input
-            onChange={(e) => {setTokenDecimals(e.target.value)}}
-          />
-        </HStack>
-        <Button
-          onClick={onSubmit}
+        <Text margin="4%" fontSize="4vh" textAlign="center">Token Editor</Text>
+        <Divider width="100%"/>
+        <Box
+          padding="8"
         >
-          Submit
-        </Button>
-        </>
-        }
+        { 
+          !tokenData ? null :
+          <VStack justifyContent="center">
+            <Avatar 
+              bg='teal.500' 
+              borderRadius="70%"
+              width="200px"
+              height="200px"
+              alignSelf="center"
+              src={image != null 
+                  ? image 
+                  : tokenData.logoURL !== "" 
+                    ? tokenData.logoURL
+                    : '/static/chip.png'
+              }
+            />
+            <Input 
+                type="file"
+                accept="image/png, image/jpeg"
+                onChange={onImageChange} 
+            />
+          </VStack>
+          }
+          <HStack justifyContent={!tokenAddress ? "center": "space-between"} width="100%">
+            <Flex>
+              { !tokenData ? null : <Text>Token Address: </Text>}
+            </Flex>
+            <Flex>
+              <Input
+                value={tokenData?.address}
+                placeholder='0x000...00'
+                onChange={(e) => {setTokenAddress(e.target.value)}}
+              />
+            </Flex>
+          </HStack>
+          { 
+            !tokenData ? null :
+            <>
+
+          <ConfigRow 
+            title="Name"
+            value={tokenData.name}
+            setter={setTokenName}
+            stateVariable={tokenName}
+          />
+          <ConfigRow 
+            title="Symbol"
+            value={tokenData.symbol}
+            setter={setTokenSymbol}
+            stateVariable={tokenSymbol}
+          />
+          <ConfigRow 
+            title="Decimals"
+            value={tokenData.decimals}
+            setter={setTokenDecimals}
+            stateVariable={tokenDecimals}
+          />
+
+          <Button
+            onClick={onSubmit}
+          >
+            Submit
+          </Button>
+          </>
+          }
+        </Box>
      </Card>
    </Flex>
   )
 }
 
 export default Home
+
+const ConfigRow = ({
+  title, 
+  value,
+  setter,
+  stateVariable,
+} : {
+  title: string, 
+  value: string | number,
+  setter: (value: StateType) => void,
+  stateVariable: StateType,
+}) => {
+  useEffect(() => {
+    if(value !== "" && !stateVariable.filled) {
+      setter({filled: true, value: value.toString()})
+    }
+  })
+
+  return (
+    <HStack justifyContent="space-between" width="100%">
+      <Flex>
+        <Text>{title}</Text>
+      </Flex>
+      <Flex>
+        <Input
+          value={stateVariable.value}
+          onChange={(e) => setter({...stateVariable, value: e.target.value})}
+        />
+      </Flex>
+    </HStack>
+  )
+}

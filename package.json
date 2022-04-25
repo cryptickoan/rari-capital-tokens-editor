@@ -14,11 +14,15 @@
     "@emotion/styled": "^11.8.1",
     "@next/swc-darwin-arm64": "^12.1.5",
     "@octokit/rest": "^18.12.0",
+    "axios": "^0.27.0",
+    "ethers": "^5.6.4",
     "framer-motion": "^6.3.1",
     "next": "12.1.5",
+    "node-vibrant": "*",
     "rari-components": "git+https://github.com/Rari-Capital/rari-components.git#144451807e8673b4586274adfb8e78346ab32fce",
     "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "react-dom": "18.0.0",
+    "react-query": "^3.38.0"
   },
   "devDependencies": {
     "@octokit/core": "^3.6.0",

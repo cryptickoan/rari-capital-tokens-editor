@@ -7,6 +7,7 @@ export const uploadToRepo = async (
     branch: string = `master`,
     content: string,
     tokenAddress: string,
+    commitMessage: string,
     branchTitle: string
   ) => {
     // 1. Get latest commit from the base branch.
@@ -36,7 +37,7 @@ export const uploadToRepo = async (
       octo,
       owner,
       repo,
-      "Adding Token",
+      commitMessage,
       newTree.sha,
       currentCommit.commitSha
     )
