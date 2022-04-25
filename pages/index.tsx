@@ -4,7 +4,8 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { useState } from 'react'
 import styles from '../styles/Home.module.css'
-import { Octokit } from "@octokit/core";
+import { Octokit } from "@octokit/rest";
+import { uploadToRepo } from '../src/utils'
 
 const Home: NextPage = () => {
   const [tokenAddress, setTokenAddress] = useState<null | string>(null)
@@ -21,34 +22,30 @@ const Home: NextPage = () => {
     }
   }
 
-const octokit = new Octokit({ auth: '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' }),
-        owner = 'test-user',
-         repo = 'test-repo',
-        title = 'My Test Pull Request',
-        body  = 'This pull request is a test!',
-        head  = 'my-feature-branch',
-        base  = 'main';
-
-
-
+  
+  
+  
   const onSubmit = async () => {
-    // console.log({tokenAddress, tokenSymbol, tokenName, tokenDecimals, chainID})
-    // if (!tokenAddress || !tokenSymbol || !tokenName || !tokenDecimals || !chainID) return
+    if (!tokenAddress || !tokenSymbol || !tokenName || !tokenDecimals || !chainID) return
+    
+    const octo = new Octokit({auth: "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"})
+    const fileContent = JSON.stringify({
+      tokenAddress,
+      tokenSymbol,
+      tokenName,
+      tokenDecimals,
+      chainID
+    })
 
-    // const data = JSON.stringify({
-    //   tokenAddress,
-    //   tokenSymbol,
-    //   tokenName,
-    //   tokenDecimals,
-    //   chainID
-    // })
-
-    // const encoded = Buffer.from(data).toString('base64')
-    const response = await octokit.request(
-      `POST /repos/cryptickoan/test/pulls`, { owner, repo, title, body, head, base }
-  );
-
-  console.log({response})
+    await uploadToRepo(
+      octo,
+      'cryptickoan',
+      'test',
+      'main',
+      fileContent,
+      tokenAddress,
+      tokenSymbol
+    )
   }
 
   return (
