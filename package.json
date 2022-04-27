@@ -9,14 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^1.0.0",
     "@chakra-ui/react": "^1.8.8",
-    "@chakra-ui/icons":"^1.0.0",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@octokit/rest": "^18.12.0",
     "axios": "^0.27.0",
     "ethers": "^5.6.4",
     "framer-motion": "^6.3.1",
+    "graphql-request": "^4.2.0",
+    "graphql-tag": "^2.12.6",
     "next": "12.1.5",
     "node-vibrant": "*",
     "rari-components": "git+https://github.com/Rari-Capital/rari-components.git#144451807e8673b4586274adfb8e78346ab32fce",

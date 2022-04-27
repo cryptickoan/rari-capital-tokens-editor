@@ -1,4 +1,3 @@
-import { TokenDataOverrides } from "../../src/hooks/useTokenData";
 import {
   isSupportedChainId,
   coingeckoNetworkPath,
@@ -13,6 +12,7 @@ import axios from "axios";
 
 // Color
 import Vibrant from "node-vibrant";
+import { TokenDataOverrides } from "../../src/constants/tokenDataOverrides";
 
 let method: "RARI" | "COINGECKO" | "CONTRACT";
 
@@ -23,7 +23,6 @@ export default async function handler(
   response.setHeader("Cache-Control", "max-age=3600, s-maxage=3600");
 
   const { address: _address, chainId: _chainId = "1" } = request.query;
-  console.log(request.query);
 
   let chainId: number;
 
@@ -136,9 +135,7 @@ export default async function handler(
       try {
         const { data: _coingeckoData } = await axios.get(coingeckoURL);
         coingeckoData = _coingeckoData;
-      } catch (err){
-
-      }
+      } catch (err) {}
 
       if (!!coingeckoData) {
         // We got data from Coingecko
@@ -216,7 +213,7 @@ export default async function handler(
     overrides
   );
 
-  console.log({ overrides, basicTokenInfo, address });
+  // console.log({ overrides, basicTokenInfo, address });
 
   // 11. colors
   // Get the color
